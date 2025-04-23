@@ -176,9 +176,14 @@
       try {
         const result = await loginViaJSONP(nama, nisn, kelas);
         if (result.success) {
+          // Generate token untuk mapel.html
+          const mapelToken = Math.random().toString(36).substring(2, 15) + Date.now();
+          sessionStorage.setItem('mapel_token', mapelToken);
           sessionStorage.setItem('user', JSON.stringify({ nama, nisn, kelas }));
-          sessionStorage.setItem('foto', result.foto); // 🔑 Simpan foto
-          window.location.href = 'mapel.html';
+          sessionStorage.setItem('foto', result.foto);
+          
+          // Redirect dengan token
+          window.location.href = `mapel.html?token=${mapelToken}`;
         } else {
           hideLoading();
 

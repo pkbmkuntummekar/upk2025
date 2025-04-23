@@ -100,7 +100,20 @@
     }
 
     const user = JSON.parse(sessionStorage.getItem('user'));
-    if (!user) window.location.href = 'index.html';
+      if (!user) window.location.href = 'index.html';
+
+      // Cek token URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      const savedToken = sessionStorage.getItem('mapel_token');
+
+      if (!urlToken || urlToken !== savedToken) {
+        sessionStorage.removeItem('mapel_token');
+        window.location.href = 'index.html';
+      }
+
+      // Hapus token setelah validasi
+      sessionStorage.removeItem('mapel_token');
 
     function getMapel(kelas) {
       return new Promise(resolve => {
@@ -140,8 +153,13 @@
             card.style.cursor = 'pointer';
             card.classList.add('active');
             card.onclick = () => {
+              // Generate token baru untuk soal.html
+              const soalToken = Math.random().toString(36).substring(2, 15) + Date.now();
+              sessionStorage.setItem('soal_token', soalToken);
               sessionStorage.setItem('mapel', item.mataPelajaran);
-              window.location.href = 'soal.html';
+              
+              // Redirect dengan token baru
+              window.location.href = `soal.html?token=${soalToken}`;
             };
           } else {
             card.classList.add('opacity-50');

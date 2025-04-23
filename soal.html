@@ -463,10 +463,24 @@
       return a;
     }
   
+    // Validasi session dan token
     const user = JSON.parse(sessionStorage.getItem('user'));
-    if (!user) location = 'index.html';
     const mapel = sessionStorage.getItem('mapel');
-    if (!mapel) location = 'mapel.html';
+    if (!user || !mapel) window.location.href = 'index.html';
+
+    // Cek token URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token');
+    const savedToken = sessionStorage.getItem('soal_token');
+
+    if (!urlToken || urlToken !== savedToken) {
+      sessionStorage.removeItem('soal_token');
+      window.location.href = 'index.html';
+    }
+
+    // Hapus token setelah validasi
+    sessionStorage.removeItem('soal_token');
+
     let questions = [], answers = {}, current = 0;
     let startTime = Date.now();
   
@@ -740,35 +754,57 @@
     function showConfirm() {
       const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
       modal.show();
+      
       document.getElementById('btn-notSure').onclick = () => modal.hide();
+      
       document.getElementById('btn-sure').onclick = async () => {
         modal.hide();
-        await submitAll();
-        clearLocalAnswer(); // ✅ Hapus cache setelah submit
-        showThankYou();
+        showLoading(); // TAMPILKAN LOADING SETELAH TOMBOL YAKIN DIKLIK
+        try {
+          await submitAll();
+          clearLocalAnswer();
+          showThankYou();
+        } catch (err) {
+          console.error(err);
+        }
       };
     }
   
     async function submitAll() {
+      showLoading(); // TAMPILKAN LOADING
+
       if (!navigator.onLine) {
+        hideLoading(); // SEMBUNYIKAN JIKA OFFLINE
         alert("Tidak bisa mengirim jawaban saat offline. Harap sambungkan kembali internet.");
         return;
       }
 
-      const answerList = questions.map((q, i) =>
-        answers[i]?.value ? `${q.no}:${answers[i].value}` : `${q.no}:`
-      );
-      const jawabanStr = answerList.join(',');
-      const duration = Math.round((Date.now() - startTime) / 60000);
+      try {
+        const answerList = questions.map((q, i) =>
+          answers[i]?.value ? `${q.no}:${answers[i].value}` : `${q.no}:`
+        );
+        const jawabanStr = answerList.join(',');
+        const duration = Math.round((Date.now() - startTime) / 60000);
 
-      await jsonp('submit', {
-        nama: user.nama,
-        nisn: user.nisn,
-        kelas: user.kelas,
-        mapel,
-        jawaban: jawabanStr,
-        durasi: duration
-      });
+        await jsonp('submit', {
+          nama: user.nama,
+          nisn: user.nisn,
+          kelas: user.kelas,
+          mapel,
+          jawaban: jawabanStr,
+          durasi: duration
+        });
+
+      } catch (err) {
+        console.error('Gagal submit:', err);
+        alert('Terjadi kesalahan saat mengirim jawaban!');
+      } finally {
+        hideLoading(); // SEMBUNYIKAN LOADING SETELAH SELESAI/ERROR
+      }
+
+      // Clear session setelah submit
+      sessionStorage.removeItem('mapel');
+      sessionStorage.removeItem('soal_token');
     }
 
   
