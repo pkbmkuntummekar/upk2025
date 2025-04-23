@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Dashboard PKBM</title>
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+    }
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #1e1e1e;
+      color: #fff;
+      padding: 1rem;
+      z-index: 1000;
+    }
+    main {
+      overflow: hidden;
+    }
+    #sidebar {
+      position: fixed;
+      top: 64px; /* Tinggi header */
+      left: 0;
+      width: 220px;
+      height: calc(100vh - 64px);
+      background: #f8f9fa;
+      border-right: 1px solid #dee2e6;
+      padding-top: 1rem;
+      overflow-y: auto;
+      z-index: 999;
+    }
+    #sidebar .nav-link {
+      color: #333;
+      font-weight: 500;
+    }
+    #sidebar .nav-link.active {
+      background: #e9ecef;
+    }
+    #content {
+      margin-left: 220px;
+      margin-top: 64px;
+      overflow-y: auto;
+      padding: 1.5rem;
+      background: #fff;
+      height: calc(100vh - 64px);
+    }
+    footer {
+      background: #f8f9fa;
+      padding: .5rem;
+      text-align: center;
+      border-top: 1px solid #dee2e6;
+    }
+    /* Card grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+      gap: 1rem;
+    }
+
+    /* Foto profil bulat */
+    .card-img-top-container {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    }
+
+    .card-img-profile {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    }
+
+    /* Jika ingin ukuran lebih kecil di card grid */
+    .card-grid .card-img-profile {
+    width: 100px;
+    height: 100px;
+    }
+
+    .card:hover .card-img-profile {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .mapel-card {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      animation: fadeInSlide 0.5s ease forwards;
+      opacity: 0;
+    }
+
+    .mapel-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+
+    .mapel-card.active {
+      border: 2px solid #4a00e0;
+      background-color: #f0eaff;
+    }
+
+
+    /* BANK SOAL
+    /* Tombol tambah melayang */
+    .floating-action-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 7rem;
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Modal form soal */
+    #modalSoal .form-control {
+        font-size: 0.9rem;
+    }
+    #modalSoal .col-md-6 {
+        margin-bottom: 0.5rem;
+    }
+
+    .toast {
+        min-width: 250px;
+        margin-bottom: 1rem;
+        opacity: 1;
+    }
+
+    /* Animasi card */
+    .card-hover-effect {
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+    .card-hover-effect:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Responsif tabel */
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.8rem;
+        }
+        .table th, .table td {
+            padding: 0.3rem;
+        }
+    }
+
+
+    /* Tambahan CSS untuk tampilan yang lebih baik */
+    .img-thumbnail {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+    }
+
+    .table-responsive {
+    max-height: 70vh;
+    overflow-y: auto;
+    }
+
+    .text-success {
+    color: #28a745 !important;
+    }
+
+    .text-warning {
+    color: #ffc107 !important;
+    }
+
+    .text-danger {
+    color: #dc3545 !important;
+    }
+
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1050;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .d-none { display: none !important; }
+
+
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+      <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="d-none">
+        <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Admin Login Screen -->
+    <div id="admin-login" class="vh-100 d-flex align-items-center justify-content-center bg-dark text-white">
+        <div class="card fade-in shadow p-4" style="min-width: 320px; max-width: 400px;">
+          <h4 class="text-center mb-4">Login Admin</h4>
+          <form id="adminLoginForm">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" id="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Masuk</button>
+          </form>
+          <div id="loginError" class="text-danger text-center mt-3 d-none"></div>
+        </div>
+    </div>
+      
+  
+    <div id="admin-wrapper" class="d-none">
+        <!-- HEADER -->
+        <header class="d-flex align-items-center justify-content-between">
+            <h4 class="mb-0">Admin Dashboard PKBM</h4>
+            <button class="btn btn-outline-light btn-sm" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </header>
+
+        <!-- MAIN -->
+        <main>
+            <!-- SIDEBAR -->
+            <nav id="sidebar">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link active" href="#" data-section="siswa">Daftar Siswa</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-section="jadwal">Jadwal Mata Pelajaran</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-section="banksoal">Bank Soal</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-section="nilai">Nilai</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-section="pengaturan">Pengaturan</a></li>
+            </ul>
+            </nav>
+
+            <!-- CONTENT -->
+            <div id="content">
+            
+            <!-- Daftar Siswa -->
+            <section id="siswa" class="section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Daftar Siswa</h5>
+                <div>
+                    <select id="filter-kelas" class="form-select form-select-sm d-inline-block w-auto">
+                    <option value="">Semua Kelas</option>
+                    <option>Paket A Kelas VI</option>
+                    <option>Paket B Kelas IX</option>
+                    <option>Paket C Kelas XII</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
+                    <i class="bi bi-plus-lg"></i> Tambah
+                    </button>
+                </div>
+                </div>
+                <div class="card-grid fade-in" id="grid-siswa"></div>
+            </section>
+
+            <!-- Jadwal Mata Pelajaran -->
+            <section id="jadwal" class="section d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Jadwal Mata Pelajaran</h5>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahJadwal">
+                    <i class="bi bi-plus-lg"></i> Tambah
+                </button>
+                </div>
+                <div class="card-grid fade-in" id="grid-jadwal">
+                <!-- kartu jadwal -->
+                </div>
+            </section>
+
+            <!-- Bank Soal -->
+            <section id="banksoal" class="section d-none">
+                <h5 class="mb-3">Bank Soal</h5>
+                
+                <!-- Tingkat 1: Daftar Kelas -->
+                <div class="card-grid mb-4" id="banksoal-kelas">
+                  <!-- Kartu kelas akan diisi oleh JavaScript -->
+                </div>
+                
+                <!-- Tingkat 2: Daftar Mapel (akan muncul setelah kelas dipilih) -->
+                <div class="card-grid mb-4 d-none" id="banksoal-mapel"></div>
+                
+                <!-- Tingkat 3: Daftar Soal (tabel) -->
+                <div id="banksoal-soal" class="d-none">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 id="banksoal-judul"></h5>
+                    <button class="btn btn-primary btn-sm" id="tambah-soal-btn">
+                      <i class="bi bi-plus-lg"></i> Tambah Soal
+                    </button>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>No</th>
+                          <th>Soal</th>
+                          <th>Gambar</th>
+                          <th>Opsi A</th>
+                          <th>Opsi B</th>
+                          <th>Opsi C</th>
+                          <th>Opsi D</th>
+                          <th>Opsi E</th>
+                          <th>Kunci</th>
+                          <th>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tabel-soal">
+                        <!-- Data soal akan diisi oleh JavaScript -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                <!-- Tombol Tambah Soal Melayang -->
+                <button class="btn btn-primary rounded-circle floating-action-btn d-none" id="float-tambah-soal">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </section>
+
+            <!-- Nilai -->
+            <section id="nilai" class="section d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5>Nilai</h5>
+                  <div>
+                    <select id="filter-kelas-nilai" class="form-select form-select-sm d-inline-block w-auto">
+                      <option value="">Semua Kelas</option>
+                      <option>Paket A Kelas VI</option>
+                      <option>Paket B Kelas IX</option>
+                      <option>Paket C Kelas XII</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="card-grid" id="grid-nilai">
+                  <!-- Kartu nilai akan diisi oleh JavaScript -->
+                </div>
+              </section>
+
+            <!-- Pengaturan -->
+            <section id="pengaturan" class="section d-none">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Pengaturan Akun</h5>
+                    <form id="form-pengaturan" style="max-width: 400px">
+                      <div class="mb-3">
+                        <label for="admin-user" class="form-label">Username</label>
+                        <input type="text" id="admin-user" class="form-control" value="admin" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="admin-pass" class="form-label">Password Baru</label>
+                        <input type="password" id="admin-pass" class="form-control">
+                      </div>
+                      <div class="mb-3">
+                        <label for="admin-pass-confirm" class="form-label">Konfirmasi Password</label>
+                        <input type="password" id="admin-pass-confirm" class="form-control">
+                      </div>
+                      <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </form>
+                  </div>
+                </div>
+                
+                <!-- ======= AWAL: FILTER RESET STATUS PENGATURAN ======= -->
+                <div class="card mt-4">
+                  <div class="card-body">
+                    <h5 class="card-subtitle mb-3">Reset Status Peserta</h5>
+                    <div class="mb-3">
+                      <label for="kelasFilter" class="form-label">Pilih Kelas:</label>
+                      <select id="kelasFilter" class="form-select">
+                        <option value="">-- Pilih Kelas --</option>
+                        <!-- options akan diisi via JS -->
+                      </select>
+                    </div>
+                    <button id="btnLoadStatus" class="btn btn-sm btn-primary mb-3 d-none" disabled>
+                      Tampilkan Data
+                    </button>
+
+                    <div id="statusContainer">
+                      <!-- tabel Nama & Status + tombol Reset akan muncul di sini -->
+                    </div>
+                  </div>
+                </div>
+                <!-- Toast container -->
+                <div id="toastContainer" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
+                <!-- ======= AKHIR: FILTER RESET STATUS PENGATURAN ======= -->
+
+                <!-- ===== AWAL: MANAGE STATUS MAPEL ===== -->
+                <div class="card mt-4">
+                  <div class="card-body">
+                    <h5 class="card-title">Manage Status Mata Pelajaran</h5>
+                    <div id="mapelCards" class="card-grid mt-3"></div>
+                  </div>
+                </div>
+                <!-- ===== AKHIR: MANAGE STATUS MAPEL ===== -->
+              </section>
+
+
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer>
+            © 2025 PKBM Kuntum Mekar
+        </footer>
+    </div>
+
+        <!-- MODAL: Tambah Siswa -->
+        <div class="modal fade" id="modalTambahSiswa" tabindex="-1">
+            <div class="modal-dialog">
+            <form class="modal-content">
+                <div class="modal-header">
+                <h6 class="modal-title">Tambah Siswa Baru</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <div class="mb-2">
+                    <label class="form-label">Nama</label>
+                    <input type="text" class="form-control" name="nama">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">NISN</label>
+                    <input type="text" class="form-control" name="nisn">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Kelas</label>
+                    <select class="form-select" name="kelas">
+                    <option>Paket A Kelas VI</option>
+                    <option>Paket B Kelas IX</option>
+                    <option>Paket C Kelas XII</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Foto</label>
+                    <div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="fotoOption" id="fotoOptionLink" value="link" checked>
+                        <label class="form-check-label" for="fotoOptionLink">Link</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="fotoOption" id="fotoOptionUpload" value="upload">
+                        <label class="form-check-label" for="fotoOptionUpload">Upload</label>
+                      </div>
+                    </div>
+                    <input type="text" class="form-control mt-1" name="fotoLink" placeholder="URL gambar">
+                    <input type="file" class="form-control mt-1 d-none" name="fotoFile" accept="image/*">
+                  </div>                  
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+                </div>
+            </form>
+            </div>
+        </div>
+
+        <!-- MODAL: Tambah Jadwal -->
+        <div class="modal fade" id="modalTambahJadwal" tabindex="-1">
+            <div class="modal-dialog">
+            <form class="modal-content">
+                <div class="modal-header">
+                <h6 class="modal-title">Tambah Jadwal</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <input type="hidden" name="id">
+                <div class="mb-2">
+                    <label class="form-label">Kelas</label>
+                    <select class="form-select" name="kelas">
+                    <option>Paket A Kelas VI</option>
+                    <option>Paket B Kelas IX</option>
+                    <option>Paket C Kelas XII</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Mata Pelajaran</label>
+                    <input type="text" class="form-control" name="mapel">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Hari/Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Semester</label>
+                    <input type="text" class="form-control" name="semester">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Jam Pelajaran</label>
+                    <input type="text" class="form-control" name="jamPelajaran">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Waktu Ujian (menit)</label>
+                    <input type="number" class="form-control" name="waktuUjian">
+                </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+                </div>
+            </form>
+            </div>
+        </div>
+  
+
+        <!-- MODAL: Tambah/Edit Soal -->
+        <div class="modal fade" id="modalSoal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+            <form class="modal-content" id="formSoal">
+                <div class="modal-header">
+                <h6 class="modal-title">Tambah Soal Baru</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <input type="hidden" id="soalId">
+                <div class="mb-3">
+                    <label class="form-label">Soal</label>
+                    <textarea class="form-control" id="soalText" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Gambar (URL)</label>
+                    <input type="text" class="form-control" id="soalGambar">
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Opsi A</label>
+                            <input type="text" class="form-control" id="opsiA" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Opsi B</label>
+                            <input type="text" class="form-control" id="opsiB" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Opsi C</label>
+                            <input type="text" class="form-control" id="opsiC" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Opsi D</label>
+                            <input type="text" class="form-control" id="opsiD" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Opsi E</label>
+                            <input type="text" class="form-control" id="opsiE" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Kunci Jawaban</label>
+                    <select class="form-select" id="kunciJawaban" required>
+                    <option value="">Pilih Kunci</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    </select>
+                </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+            </div>
+        </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Show/hide loading overlay
+    function showLoading() { document.getElementById('loadingOverlay').classList.remove('d-none'); }
+    function hideLoading() { document.getElementById('loadingOverlay').classList.add('d-none'); }
+
+
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      showLoading();
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      try {
+        // Panggil endpoint adminLogin
+        const res = await jsonp('adminLogin', { username: user, password: pass });
+        if (res.success) {
+          sessionStorage.setItem('adminLogin', 'true');
+          sessionStorage.setItem('adminUsername', user); // ← simpan di sini
+          document.getElementById('admin-login').classList.add('d-none');
+          document.getElementById('admin-wrapper').classList.remove('d-none');
+          await loadSiswa();
+        } else {
+          throw new Error(res.message);
+        }
+      } catch (err) {
+        const errEl = document.getElementById('loginError');
+        errEl.textContent = err.message;
+        errEl.classList.remove('d-none');
+      } finally {
+        hideLoading();
+      }
+    });
+
+
+    // Jika sudah login sebelumnya
+    window.addEventListener('DOMContentLoaded', () => {
+        if (sessionStorage.getItem('adminLogin') === 'true') {
+        document.getElementById('admin-login').classList.add('d-none');
+        document.getElementById('admin-wrapper').classList.remove('d-none');
+        }
+    });
+
+    //FUNGSI LOGOUT
+    function logout() {
+        if (confirm('Apakah Anda yakin ingin logout?')) {
+            sessionStorage.removeItem('adminLogin');
+            document.getElementById('admin-wrapper').classList.add('d-none');
+            document.getElementById('admin-login').classList.remove('d-none');
+            
+            // Reset form login
+            document.getElementById('adminLoginForm').reset();
+            document.getElementById('loginError').classList.add('d-none');
+        }
+    }
+
+
+
+    // 1) URL Web App kamu
+    const BASE_URL = 'https://script.google.com/macros/s/AKfycbweUxww34uk0pqPE-Gk_xaebgvxRNRCFicXy7I22gYTlt2xFi1uwrv1iK0FhTDEaw17/exec';
+
+    // 2) Helper JSONP
+    // Perbaiki fungsi jsonp untuk error handling yang lebih baik
+    function jsonp(action, params = {}) {
+      showLoading();
+      const cb = 'cb_' + Date.now();
+      const timeout = setTimeout(() => {
+        delete window[cb];
+        hideLoading();
+        reject(new Error('Timeout: Tidak dapat terhubung ke server'));
+      }, 10000);
+
+      return new Promise((resolve, reject) => {
+        window[cb] = data => {
+          clearTimeout(timeout);
+          delete window[cb];
+          hideLoading();
+          if (data && data.success !== false) resolve(data);
+          else reject(new Error(data?.message || 'Terjadi kesalahan pada server'));
+        };
+        const qs = [`action=${action}`, `callback=${cb}`]
+          .concat(Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`))
+          .join('&');
+        const script = document.createElement('script');
+        script.src = `${BASE_URL}?${qs}`;
+        script.onerror = () => {
+          clearTimeout(timeout);
+          delete window[cb];
+          hideLoading();
+          reject(new Error('Gagal memuat skrip'));
+        };
+        document.body.appendChild(script);
+      });
+    }
+
+    // 3) Load Daftar Siswa
+    async function loadSiswa() {
+    const kelas = document.getElementById('filter-kelas').value;
+    const res = await jsonp('getSiswa', { kelas });
+    const grid = document.getElementById('grid-siswa');
+    grid.innerHTML = '';
+        // Filter data berdasarkan kelas jika filter aktif
+        const siswaList = res.siswa || [];
+        const filteredSiswa = kelas 
+            ? siswaList.filter(s => s.kelas === kelas)
+            : siswaList;
+        
+        if (filteredSiswa.length === 0) {
+            grid.innerHTML = `
+            <div class="col-12 text-center py-4 text-muted">
+                <i class="bi bi-people-fill fs-1"></i>
+                <p class="mt-2">Tidak ada siswa ditemukan</p>
+            </div>
+            `;
+            return;
+        }
+
+            filteredSiswa.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-img-top-container">
+                    <img src="${s.foto||'placeholder.jpg'}" class="card-img-profile" alt="Foto Profil">
+                </div>
+                <div class="card-body fade-in">
+                <h6 class="card-title">${s.nama}</h6>
+                <p class="card-text small">${s.nisn}<br>${s.kelas}</p>
+                <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-sm btn-outline-secondary edit-siswa" data-nisn="${s.nisn}"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-danger del-siswa" data-nisn="${s.nisn}"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>`;
+            grid.appendChild(card);
+        });
+
+        // hook delete buttons
+        document.querySelectorAll('.del-siswa').forEach(btn=>{
+            btn.onclick = async ()=> {
+                if(!confirm('Hapus siswa ini?')) return;
+                try {
+                    await jsonp('deleteSiswa',{ nisn: btn.dataset.nisn });
+                    showToast('success', 'Siswa berhasil dihapus');
+                    loadSiswa();
+                } catch (error) {
+                    showToast('danger', 'Gagal menghapus siswa: ' + error.message);
+                }
+            };
+        });
+        // hook edit buttons
+        document.querySelectorAll('.edit-siswa').forEach(btn=>{
+            btn.onclick = () => {
+                const siswa = filteredSiswa.find(s => s.nisn === btn.dataset.nisn);
+                if (!siswa) return;
+
+                const form = document.querySelector('#modalTambahSiswa form');
+                form.dataset.mode = 'edit';
+                form.dataset.oldNisn = siswa.nisn; // ← ✅ Tambahkan di sini
+                form.elements.nama.value  = siswa.nama;
+                form.elements.nisn.value  = siswa.nisn;
+                form.elements.kelas.value = siswa.kelas;
+                // Tangani foto: jika URL valid, tampilkan di "Link", kalau tidak kosongkan
+                if (siswa.foto && siswa.foto.startsWith('http')) {
+                    form.elements.fotoOption.value = 'link';
+                    form.elements.fotoLink.value = siswa.foto;
+                    form.elements.fotoLink.classList.remove('d-none');
+                    form.elements.fotoFile.classList.add('d-none');
+                } else {
+                    form.elements.fotoOption.value = 'link';
+                    form.elements.fotoLink.value = '';
+                    form.elements.fotoLink.classList.remove('d-none');
+                    form.elements.fotoFile.classList.add('d-none');
+                }
+
+                // Ganti judul modal ke "Edit Siswa"
+                form.closest('.modal').querySelector('.modal-title').textContent = 'Edit Siswa';
+
+                new bootstrap.Modal(document.getElementById('modalTambahSiswa')).show();
+            };
+
+        });
+    }
+
+    // 4) Load Jadwal
+    async function loadJadwal() {
+    const res = await jsonp('getJadwalAdmin');
+    const grid = document.getElementById('grid-jadwal');
+    grid.innerHTML = '';
+    (res.jadwal||[]).forEach(j => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+        <div class="card-body fade-in">
+            <h6 class="card-title">${j.kelas}</h6>
+            <p class="card-text small">
+            Pelajaran: ${j.mapel}<br>
+            ${formatTanggal(j.tanggal)}<br>  <!-- Ini yang diubah -->
+            Semester ${j.semester}<br>
+            Jam: ${j.jamPelajaran}<br>
+            Durasi: ${j.waktuUjian} menit
+            </p>
+            <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-sm btn-outline-secondary edit-jadwal" data-id="${j.id}"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-outline-danger del-jadwal" data-id="${j.id}"><i class="bi bi-trash"></i></button>
+            </div>
+        </div>`;
+        grid.appendChild(card);
+    });
+        document.querySelectorAll('.del-jadwal').forEach(btn=>{
+            btn.onclick = async ()=> {
+                if(!confirm('Hapus jadwal ini?')) return;
+                try {
+                    await jsonp('deleteJadwal',{ id: btn.dataset.id });
+                    showToast('success', 'Jadwal berhasil dihapus');
+                    loadJadwal();
+                } catch (error) {
+                    showToast('danger', 'Gagal menghapus jadwal: ' + error.message);
+                }
+            };
+        });
+
+        document.querySelectorAll('.edit-jadwal').forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.dataset.id;
+                try {
+                    const res = await jsonp('getJadwalById', { id });
+                    if (!res.success) throw new Error(res.message);
+                    
+                    const form = document.querySelector('#modalTambahJadwal form');
+                    form.dataset.mode = 'edit';
+                    form.elements.id.value = id;
+                    form.elements.kelas.value = res.jadwal.kelas;
+                    form.elements.mapel.value = res.jadwal.mapel;
+                    form.elements.tanggal.value = res.jadwal.tanggal;
+                    form.elements.semester.value = res.jadwal.semester;
+                    form.elements.jamPelajaran.value = res.jadwal.jamPelajaran;
+                    form.elements.waktuUjian.value = res.jadwal.waktuUjian;
+
+                    form.closest('.modal').querySelector('.modal-title').textContent = 'Edit Jadwal';
+                    new bootstrap.Modal(document.getElementById('modalTambahJadwal')).show();
+                } catch (error) {
+                    showToast('danger', 'Gagal memuat data: ' + error.message);
+                }
+            };
+        });
+
+    }
+
+    // 5) Menu navigation + initial load
+// Event listener untuk sidebar navigation
+document.querySelectorAll('#sidebar .nav-link').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    
+    // Update active state
+    document.querySelectorAll('#sidebar .nav-link').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+    
+    // Show/hide sections
+    const sec = a.dataset.section;
+    document.querySelectorAll('section.section').forEach(s => s.classList.add('d-none'));
+    document.getElementById(sec).classList.remove('d-none');
+    
+    // Load data sesuai section
+    switch(sec) {
+      case 'siswa':
+        loadSiswa();
+        break;
+      case 'jadwal':
+        loadJadwal();
+        break;
+      case 'banksoal':
+        loadBankSoalKelas();
+        // Reset tampilan bank soal ke level 1
+        document.getElementById('banksoal-kelas').classList.remove('d-none');
+        document.getElementById('banksoal-mapel').classList.add('d-none');
+        document.getElementById('banksoal-soal').classList.add('d-none');
+        document.getElementById('float-tambah-soal').classList.add('d-none');
+        break;
+      case 'nilai':
+        loadNilai();
+        break;
+      case 'pengaturan':
+        const saved = sessionStorage.getItem('adminUsername') || '';
+        document.getElementById('admin-user').value = saved;
+        break;
+    }
+  });
+});
+
+    // 6) Form Tambah / Edit Siswa
+    document.querySelector('#modalTambahSiswa form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+
+        let foto = '';
+        if (form.elements.fotoOption.value === 'link') {
+            foto = form.elements.fotoLink.value.trim();
+        } else {
+            const file = form.elements.fotoFile.files[0];
+            if (file) {
+                alert('Upload gambar belum didukung langsung. Silakan unggah ke situs seperti Imgur lalu masukkan link-nya.');
+                return;
+            }
+        }
+
+        const formData = {
+            nama:  form.elements.nama.value,
+            nisn:  form.elements.nisn.value,
+            kelas: form.elements.kelas.value,
+            foto:  foto
+        };
+
+        if (form.dataset.mode === 'edit') {
+            formData.oldNisn = form.dataset.oldNisn;
+        }
+
+        // tentukan action berdasarkan mode
+        const mode = form.dataset.mode === 'edit' ? 'updateSiswa' : 'addSiswa';
+        try {
+            await jsonp(mode, formData);
+            bootstrap.Modal.getInstance(form.closest('.modal')).hide();
+            showToast('success', `Siswa berhasil ${mode === 'edit' ? 'diubah' : 'ditambahkan'}`);
+            // reset mode agar selalu kembali ke “tambah”
+            delete form.dataset.mode;
+            loadSiswa();
+        } catch (err) {
+            showToast('danger', err.message);
+        }
+    });
+
+
+    // 7) Form Tambah Jadwal
+    document.querySelector('#modalTambahJadwal form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = {
+            id: form.elements.id.value,
+            kelas: form.elements.kelas.value,
+            mapel: form.elements.mapel.value,
+            tanggal: form.elements.tanggal.value,
+            semester: form.elements.semester.value,
+            jamPelajaran: form.elements.jamPelajaran.value,
+            waktuUjian: form.elements.waktuUjian.value
+        };
+
+        const mode = form.dataset.mode === 'edit' ? 'updateJadwal' : 'addJadwal';
+        
+        try {
+            await jsonp(mode, formData);
+            bootstrap.Modal.getInstance(form.closest('.modal')).hide();
+            showToast('success', `Jadwal berhasil ${mode === 'edit' ? 'diperbarui' : 'ditambahkan'}`);
+            loadJadwal();
+        } catch (err) {
+            showToast('danger', err.message);
+        }
+    });
+
+    document.getElementById('filter-kelas').addEventListener('change', loadSiswa);
+
+
+    document.querySelectorAll('.edit-jadwal').forEach(btn => {
+        btn.onclick = () => {
+            const id = btn.dataset.id;
+            const card = btn.closest('.card');
+            const lines = card.querySelector('.card-text').innerText.split('\n');
+
+            const form = document.querySelector('#modalTambahJadwal form');
+            form.dataset.mode = 'edit';
+            form.dataset.id = id;
+            form.elements.kelas.value = card.querySelector('.card-title').textContent.trim();        // kelas
+            form.elements.mapel.value = lines[0].replace('Pelajaran: ', '').trim();                 // mapel
+            form.elements.tanggal.value = lines[1].split('|')[0].trim();                              // tanggal
+            form.elements.semester.value = lines[1].split('|')[1].replace('Semester ', '').trim();          // semester
+            form.elements.jamPelajaran.value = lines[2].split('|')[0].replace('Jam: ', '').trim();         // jam
+            form.elements.waktuUjian.value = lines[2].split('|')[1].replace('Durasi: ', '').replace('mnt','').trim(); // waktu
+
+            // Ganti judul modal
+            form.closest('.modal').querySelector('.modal-title').textContent = 'Edit Jadwal';
+
+            new bootstrap.Modal(document.getElementById('modalTambahJadwal')).show();
+        }
+    });
+
+
+
+
+
+    //BANK SOAL
+    // Variabel state untuk navigasi bank soal
+    let currentKelas = null;
+    let currentMapel = null;
+
+    // Load daftar kelas untuk bank soal
+    async function loadBankSoalKelas() {
+        try {
+            const res = await jsonp('getKelasForBankSoal');
+            console.log('Data kelas dari server:', res);
+            
+            if (!res.success) {
+            throw new Error(res.message || 'Gagal memuat data kelas');
+            }
+            
+            const grid = document.getElementById('banksoal-kelas');
+            grid.innerHTML = '';
+            
+            (res.kelas || []).forEach(kelas => {
+            const card = document.createElement('div');
+            card.className = 'card card-hover-effect';
+            card.innerHTML = `
+                <div class="card-body text-center">
+                <i class="bi bi-journal-bookmark fs-1 text-primary"></i>
+                <h5 class="card-title mt-2">${kelas}</h5>
+                </div>
+            `;
+            card.onclick = () => {
+                currentKelas = kelas;
+                loadBankSoalMapel(kelas);
+                document.getElementById('banksoal-kelas').classList.add('d-none');
+                document.getElementById('banksoal-mapel').classList.remove('d-none');
+            };
+            grid.appendChild(card);
+            });
+            
+        } catch (error) {
+            console.error('Gagal memuat kelas:', error);
+            const grid = document.getElementById('banksoal-kelas');
+            grid.innerHTML = `
+            <div class="alert alert-danger">
+                ${error.message}
+            </div>
+            `;
+        }
+    }
+
+    // Load daftar mapel berdasarkan kelas
+    async function loadBankSoalMapel(kelas) {
+        try {
+            const res = await jsonp('getMapelForBankSoal', { kelas });
+            console.log('Data mapel:', res);
+            
+            if (!res || !res.mapel) {
+            throw new Error('Format respons tidak valid');
+            }
+
+            const grid = document.getElementById('banksoal-mapel');
+            grid.innerHTML = '';
+            
+            res.mapel.forEach(mapel => {
+            const card = document.createElement('div');
+            card.className = 'card card-hover-effect';
+            card.innerHTML = `
+                <div class="card-body text-center">
+                <i class="bi bi-file-earmark-text fs-1 text-success"></i>
+                <h5 class="card-title mt-2">${mapel}</h5>
+                </div>
+            `;
+            card.onclick = () => {
+                currentMapel = mapel;
+                loadDaftarSoal(kelas, mapel);
+                document.getElementById('banksoal-judul').textContent = `Soal ${mapel} - ${kelas}`;
+                document.getElementById('banksoal-mapel').classList.add('d-none');
+                document.getElementById('banksoal-soal').classList.remove('d-none');
+                document.getElementById('float-tambah-soal').classList.remove('d-none');
+            };
+            grid.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error('Gagal memuat mapel:', error);
+            const grid = document.getElementById('banksoal-mapel');
+            grid.innerHTML = `
+            <div class="alert alert-danger">
+                Gagal memuat mata pelajaran: ${error.message}
+            </div>
+            `;
+        }
+    }
+
+    // Load daftar soal
+// Di bagian BANK SOAL, perbaiki fungsi-fungsi berikut:
+
+async function loadDaftarSoal(kelas, mapel) {
+  try {
+    const res = await jsonp('getSoalForBankSoal', { kelas, mapel });
+    console.log('Data soal:', res);
+    
+    if (!res.success) {
+      throw new Error(res.message || 'Gagal memuat data soal');
+    }
+
+    const tbody = document.getElementById('tabel-soal');
+    tbody.innerHTML = '';
+    
+    // Dalam fungsi loadDaftarSoal
+    (res.soal || []).forEach((soal, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${soal.soal || '-'}</td>
+        <td>${soal.gambar ? `<img src="${soal.gambar}" width="50" class="img-thumbnail">` : '-'}</td>
+        <td>${soal.opsiA || '-'}</td>
+        <td>${soal.opsiB || '-'}</td>
+        <td>${soal.opsiC || '-'}</td>
+        <td>${soal.opsiD || '-'}</td>
+        <td>${soal.opsiE || '-'}</td>
+        <td>${soal.kunci || '-'}</td>
+        <td>
+        <button class="btn btn-sm btn-outline-primary edit-soal" data-no="${soal.no}">
+            <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger hapus-soal" data-no="${soal.no}">
+            <i class="bi bi-trash"></i>
+        </button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+    });
+
+    // Di dalam loadDaftarSoal, tambahkan event listener untuk tombol edit:
+    document.querySelectorAll('.edit-soal').forEach(btn => {
+    btn.onclick = () => {
+        const row = btn.closest('tr');
+        const soalData = {
+        id: btn.dataset.no,
+        soal: row.cells[1].textContent,
+        gambar: row.cells[2].querySelector('img')?.src || '',
+        opsiA: row.cells[3].textContent,
+        opsiB: row.cells[4].textContent,
+        opsiC: row.cells[5].textContent,
+        opsiD: row.cells[6].textContent,
+        opsiE: row.cells[7].textContent,
+        kunci: row.cells[8].textContent
+        };
+        showSoalModal(soalData);
+    };
+    });
+    
+    // Tambahkan event listener untuk tombol aksi
+    document.querySelectorAll('.hapus-soal').forEach(btn => {
+    btn.onclick = () => {
+        if (confirm('Apakah Anda yakin ingin menghapus soal ini?')) {
+        hapusSoal(
+            btn.dataset.no, 
+            currentKelas, 
+            currentMapel
+        );
+        }
+    };
+    });
+    
+  } catch (error) {
+    console.error('Gagal memuat soal:', error);
+    const tbody = document.getElementById('tabel-soal');
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="10" class="text-center text-danger py-3">
+          ${error.message}
+        </td>
+      </tr>
+    `;
+  }
+}
+
+async function hapusSoal(noSoal, kelas, mapel) {
+  try {
+    console.log('Mengirim request hapus soal:', { 
+      no: noSoal, 
+      kelas: kelas, 
+      mapel: mapel 
+    });
+    
+    const res = await jsonp('deleteSoal', { 
+      no: noSoal,
+      kelas: kelas,
+      mapel: mapel
+    });
+    
+    if (!res.success) {
+      throw new Error(res.message || 'Gagal menghapus soal');
+    }
+    
+    alert('Soal berhasil dihapus');
+    loadDaftarSoal(currentKelas, currentMapel);
+    
+  } catch (error) {
+    console.error('Gagal menghapus soal:', error);
+    alert('Gagal menghapus soal: ' + error.message);
+  }
+}
+
+
+
+    // Tambahkan event listener untuk menu bank soal
+    document.querySelector('[data-section="banksoal"]').addEventListener('click', () => {
+    loadBankSoalKelas();
+    // Reset tampilan ke level 1
+    document.getElementById('banksoal-kelas').classList.remove('d-none');
+    document.getElementById('banksoal-mapel').classList.add('d-none');
+    document.getElementById('banksoal-soal').classList.add('d-none');
+    document.getElementById('float-tambah-soal').classList.add('d-none');
+    });
+
+    // Tombol tambah soal
+    document.getElementById('tambah-soal-btn').addEventListener('click', tambahSoal);
+    document.getElementById('float-tambah-soal').addEventListener('click', tambahSoal);
+
+
+    function tambahSoal() {
+        showSoalModal(null);
+    }
+
+
+
+
+
+    //AKHIR BANK SOAL
+
+    //AWAL NILAI
+    // Load daftar nilai
+// Di bagian NILAI, perbaiki fungsi-fungsi berikut:
+
+    async function loadNilai() {
+    try {
+        const kelas = document.getElementById('filter-kelas-nilai').value;
+        const res = await jsonp('getNilai', { kelas });
+        console.log('Data nilai:', res);
+        
+        if (!res.success) {
+        throw new Error(res.message || 'Gagal memuat data nilai');
+        }
+
+        const grid = document.getElementById('grid-nilai');
+        grid.innerHTML = '';
+        
+        if (res.nilai.length === 0) {
+        grid.innerHTML = `
+            <div class="col-12 text-center py-4 text-muted">
+            <i class="bi bi-clipboard-x fs-1"></i>
+            <p class="mt-2">Tidak ada data nilai ditemukan</p>
+            </div>
+        `;
+        return;
+        }
+
+        res.nilai.forEach(nilai => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-body">
+            <h6 class="card-title">${nilai.nama}</h6>
+            <p class="card-text small">
+                NISN: ${nilai.nisn}<br>
+                Kelas: ${nilai.kelas}<br>
+                Mapel: ${nilai.mapel}<br>
+                Nilai: <span class="fw-bold ${getNilaiColorClass(nilai.nilai)}">${nilai.nilai}</span> 
+                (${nilai.predikat})<br>
+                Waktu: ${formatWaktu(nilai.waktu)}<br>
+                Benar: ${nilai.benar} soal
+            </p>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-sm btn-outline-danger hapus-nilai" data-id="${nilai.id}">
+                <i class="bi bi-trash"></i> Hapus
+                </button>
+            </div>
+            </div>
+        `;
+        grid.appendChild(card);
+        });
+        
+        // Tambahkan event listener untuk tombol hapus
+        document.querySelectorAll('.hapus-nilai').forEach(btn => {
+            btn.onclick = async () => {
+                if (confirm('Apakah Anda yakin ingin menghapus nilai ini?')) {
+                    try {
+                        const res = await jsonp('deleteNilai', { id: btn.dataset.id });
+                        showToast('success', 'Nilai berhasil dihapus');
+                        loadNilai();
+                    } catch (error) {
+                        showToast('danger', 'Gagal menghapus nilai: ' + error.message);
+                    }
+                }
+            };
+        });
+
+    } catch (error) {
+        console.error('Gagal memuat nilai:', error);
+        const grid = document.getElementById('grid-nilai');
+        grid.innerHTML = `
+        <div class="alert alert-danger">
+            ${error.message}
+        </div>
+        `;
+    }
+    }
+
+    // Fungsi pembantu
+    function getNilaiColorClass(nilai) {
+    if (nilai >= 80) return 'text-success';
+    if (nilai >= 60) return 'text-warning';
+    return 'text-danger';
+    }
+
+    function formatWaktu(waktu) {
+    if (!waktu || isNaN(waktu)) return '-';
+    return `Selesai ${waktu} menit`;
+    }
+
+    // Tambahkan event listener untuk filter nilai
+    document.getElementById('filter-kelas-nilai').addEventListener('change', loadNilai);
+
+    // Tambahkan event listener untuk menu nilai
+    document.querySelector('[data-section="nilai"]').addEventListener('click', loadNilai);
+    //AKHIR NILAI
+
+
+
+    //AWAL PENGATURAN
+
+
+    // Saat halaman admin dimuat, ambil username dari server
+    window.addEventListener('DOMContentLoaded', async () => {
+      const userField = document.getElementById('admin-user');
+      try {
+        const res = await jsonp('getAdmin');
+        if (res.success) userField.value = res.username;
+      } catch (e) {
+        console.error('Gagal load admin setting', e);
+      }
+    });
+
+    // Handle form pengaturan
+    document.getElementById('form-pengaturan').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('admin-user').value.trim();
+      const password = document.getElementById('admin-pass').value.trim();
+      const confirmPass = document.getElementById('admin-pass-confirm').value.trim();
+
+      if (password && password !== confirmPass) {
+        alert('Konfirmasi password tidak sama!');
+        return;
+      }
+
+      try {
+        const res = await jsonp('updateAdmin', { username, password });
+        if (res.success) alert('Pengaturan admin berhasil disimpan!');
+        else throw new Error(res.message);
+      } catch (err) {
+        alert('Gagal menyimpan: ' + err.message);
+      }
+    });
+
+
+    /*Reset Peserta*/
+    // 1. Panggil saat menu Pengaturan di-“activate”
+    document.querySelector('[data-section="pengaturan"]').addEventListener('click', async () => {
+      await loadKelasFilter();
+    });
+
+    // 2. Load daftar kelas untuk filter
+    async function loadKelasFilter() {
+      try {
+        const res = await jsonp('getKelasFilter');
+        if (!res.success) throw new Error('Gagal ambil kelas');
+        const sel = document.getElementById('kelasFilter');
+        sel.innerHTML = '<option value="">-- Pilih Kelas --</option>' +
+          res.kelas.map(k => `<option value="${k}">${k}</option>`).join('');
+      } catch (e) {
+        showToast('danger', e.message);
+      }
+    }
+
+    // 3. Enable tombol “Tampilkan Data” saat kelas dipilih
+    // Setelah loadKelasFilter(), tambahkan:
+    document.getElementById('kelasFilter').addEventListener('change', async function() {
+      const kelas = this.value;
+      const container = document.getElementById('statusContainer');
+      if (!kelas) {
+        container.innerHTML = '';         // kosongkan jika tidak pilih kelas
+        return;
+      }
+      try {
+        const res = await jsonp('getLoginByKelas', { kelas });
+        if (!res.success) throw new Error(res.message || 'Gagal ambil data peserta');
+        renderStatusTable(res.data);
+      } catch (e) {
+        showToast('danger', e.message);
+      }
+    });
+
+
+    /* 4. Ketika tombol diklik, panggil data Login per kelas
+    document.getElementById('btnLoadStatus').addEventListener('click', async () => {
+      const kelas = document.getElementById('kelasFilter').value;
+      try {
+        const res = await jsonp('getLoginByKelas', { kelas });
+        if (!res.success) throw new Error('Gagal ambil data peserta');
+        renderStatusTable(res.data);
+      } catch (e) {
+        showToast('danger', e.message);
+      }
+    }); */
+
+    // 5. Render tabel Nama / Status / Reset
+    function renderStatusTable(data) {
+      if (!data.length) {
+        document.getElementById('statusContainer').innerHTML = '<p class="text-muted">Tidak ada peserta.</p>';
+        return;
+      }
+      let html = `<table class="table table-sm">
+        <thead><tr><th>Nama</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`;
+      data.forEach(r => {
+        // badge warna untuk status
+        let badgeClass = 'bg-secondary';
+        let statusText = r.status || '-';
+        if (r.status === 'Aktif')     badgeClass = 'bg-success';
+        else if (r.status === 'Selesai') badgeClass = 'bg-danger';
+
+        // tombol aktif untuk "Aktif" dan "Selesai"
+        const canReset = (r.status === 'Aktif' || r.status === 'Selesai');
+        const btnClass = (r.status === 'Aktif')
+          ? 'btn btn-sm btn-danger'
+          : 'btn btn-sm btn-secondary';
+        const btnDisabled = canReset ? '' : 'disabled';
+
+        html += `<tr>
+          <td>${r.nama}</td>
+          <td><span class="badge ${badgeClass}">${statusText}</span></td>
+          <td>
+            <button class="${btnClass} reset-btn"
+                    data-row="${r.row}" ${btnDisabled}>
+              Reset
+            </button>
+          </td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      document.getElementById('statusContainer').innerHTML = html;
+
+      // pasang listener tombol Reset
+      document.querySelectorAll('.reset-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const row = btn.dataset.row;
+          btn.disabled = true;
+          try {
+            const resp = await jsonp('resetStatusLogin', { row });
+            if (!resp.success) throw new Error(resp.message);
+            showToast('success', resp.message);
+            // ubah badge dan tombol menjadi tidak aktif
+            const tr = btn.closest('tr');
+            tr.querySelector('td:nth-child(2)').innerHTML = '<span class="badge bg-secondary">-</span>';
+            btn.classList.remove('btn-danger', 'btn-secondary');
+            btn.classList.add('btn-secondary');
+            btn.disabled = true;
+          } catch (e) {
+            showToast('danger', 'Reset gagal: ' + e.message);
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+
+
+    /* ===== AWAL: MANAGE STATUS MAPEL ===== */
+
+    // 1. Panggil ketika tab Pengaturan di-select
+    // (di switch('pengaturan') Anda sudah panggil loadKelasFilter())
+    // Tambahkan juga:
+    loadAllMapelStatus();
+
+    // 2. Fungsi untuk load semua Mapel
+    async function loadAllMapelStatus() {
+      try {
+        const res = await jsonp('getAllMapelStatus');
+        if (!res.success) throw new Error(res.message || 'Gagal load Mapel');
+        const container = document.getElementById('mapelCards');
+        container.innerHTML = '';
+        res.data.forEach(r => {
+          container.insertAdjacentHTML('beforeend', `
+            <div class="mapel-card card ${r.status === 'Aktif' ? 'active' : ''}">
+              <h6 class="mb-1">${r.kelas}</h6>
+              <p class="mb-2">${r.mataPelajaran}</p>
+              <select class="form-select status-select" data-row="${r.row}">
+                <option value="" ${r.status===''?'selected':''}>Tidak Aktif</option>
+                <option value="Aktif" ${r.status==='Aktif'?'selected':''}>Aktif</option>
+              </select>
+            </div>
+          `);
+        });
+        // pasang event listener
+        document.querySelectorAll('.status-select').forEach(sel => {
+          sel.addEventListener('change', async function() {
+            const row = this.dataset.row;
+            const newStatus = this.value;
+            const card = this.closest('.mapel-card');
+            try {
+              const resp = await jsonp('updateMapelStatus', { row, status: newStatus });
+              if (!resp.success) throw new Error(resp.message);
+              showToast('success', resp.message);
+
+              // Update tampilan class .active
+              if (newStatus === 'Aktif') {
+                card.classList.add('active');
+              } else {
+                card.classList.remove('active');
+              }
+
+            } catch (e) {
+              showToast('danger', 'Update gagal: ' + e.message);
+            }
+          });
+        });
+      } catch (e) {
+        showToast('danger', e.message);
+      }
+    }
+
+    /* ===== AKHIR: MANAGE STATUS MAPEL ===== */
+
+
+
+    //AKHIR PENGATURAN
+
+
+// Event listener untuk DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Cek status login
+  if (sessionStorage.getItem('adminLogin') === 'true') {
+    const saved = sessionStorage.getItem('adminUsername') || '';
+    document.getElementById('admin-user').value = saved;
+    document.getElementById('admin-login').classList.add('d-none');
+    document.getElementById('admin-wrapper').classList.remove('d-none');
+    loadSiswa(); // Load data awal
+  }
+
+});
+
+
+// Fungsi Tambah/Edit Soal
+function showSoalModal(editData = null) {
+  const modal = new bootstrap.Modal(document.getElementById('modalSoal'));
+  const form = document.getElementById('formSoal');
+  
+  if (editData) {
+    modal._element.querySelector('.modal-title').textContent = 'Edit Soal';
+    document.getElementById('soalId').value = editData.id;
+    document.getElementById('soalText').value = editData.soal;
+    document.getElementById('soalGambar').value = editData.gambar;
+    document.getElementById('opsiA').value = editData.opsiA;
+    document.getElementById('opsiB').value = editData.opsiB;
+    document.getElementById('opsiC').value = editData.opsiC;
+    document.getElementById('opsiD').value = editData.opsiD;
+    document.getElementById('opsiE').value = editData.opsiE;
+    document.getElementById('kunciJawaban').value = editData.kunci;
+  } else {
+    modal._element.querySelector('.modal-title').textContent = 'Tambah Soal';
+    form.reset();
+    document.getElementById('soalId').value = ''; // reset ID soal juga
+  }
+
+  modal.show();
+}
+
+// Handle form submit
+document.getElementById('formSoal').addEventListener('submit', async function(e) {
+    console.log('FORM SUBMIT TRIGGERED');
+  e.preventDefault(); // ✅ Cegah refresh
+
+  const form = e.target;
+  const btnSubmit = e.submitter || form.querySelector('button[type="submit"]');
+  btnSubmit.disabled = true; // ✅ Cegah klik ganda
+
+  const id = document.getElementById('soalId').value;
+  const formData = {
+    no: id,
+    kelas: currentKelas,
+    mapel: currentMapel,
+    soal: document.getElementById('soalText').value.trim(),
+    gambar: document.getElementById('soalGambar').value.trim(),
+    opsiA: document.getElementById('opsiA').value.trim(),
+    opsiB: document.getElementById('opsiB').value.trim(),
+    opsiC: document.getElementById('opsiC').value.trim(),
+    opsiD: document.getElementById('opsiD').value.trim(),
+    opsiE: document.getElementById('opsiE').value.trim(),
+    kunci: document.getElementById('kunciJawaban').value.trim().toUpperCase()
+  };
+
+  if (!formData.soal || !formData.kunci) {
+    alert('Soal dan kunci wajib diisi!');
+    btnSubmit.disabled = false;
+    return;
+  }
+
+  try {
+    const action = id ? 'updateSoal' : 'addSoal';
+    const res = await jsonp(action, formData);
+
+    if (!res.success) throw new Error(res.message || 'Gagal menyimpan soal');
+
+    bootstrap.Modal.getInstance(document.getElementById('modalSoal')).hide();
+    showToast('success', res.message || 'Soal berhasil disimpan!');
+    loadDaftarSoal(currentKelas, currentMapel);
+  } catch (err) {
+    console.error('Submit Error:', err);
+    showToast('danger', err.message);
+  } finally {
+    btnSubmit.disabled = false; // ✅ Aktifkan kembali tombol
+  }
+});
+
+
+
+
+
+// Fungsi untuk menampilkan toast notifikasi
+function showToast(type, message) {
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-bg-${type} border-0`;
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">${message}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+  
+  const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+  toastContainer.appendChild(toast);
+  
+  // Inisialisasi dan tampilkan toast
+  new bootstrap.Toast(toast, { autohide: true, delay: 3000 }).show();
+}
+
+function createToastContainer() {
+  const container = document.createElement('div');
+  container.id = 'toastContainer';
+  container.style.position = 'fixed';
+  container.style.top = '20px';
+  container.style.right = '20px';
+  container.style.zIndex = '9999';
+  document.body.appendChild(container);
+  return container;
+}
+
+// Update fungsi tambahSoal dan editSoal
+function tambahSoal() {
+  showSoalModal();
+}
+
+
+
+document.querySelector('[data-bs-target="#modalTambahSiswa"]').addEventListener('click', () => {
+    const form = document.querySelector('#modalTambahSiswa form');
+    form.reset();
+    delete form.dataset.mode;
+    form.closest('.modal').querySelector('.modal-title').textContent = 'Tambah Siswa Baru';
+});
+
+
+// Fungsi untuk menampilkan input sesuai pilihan "Link" atau "Upload"
+document.querySelectorAll('input[name="fotoOption"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+        const form = document.querySelector('#modalTambahSiswa form');
+        const linkInput = form.elements.fotoLink;
+        const fileInput = form.elements.fotoFile;
+
+        if (this.value === 'link') {
+            linkInput.classList.remove('d-none');
+            fileInput.classList.add('d-none');
+        } else {
+            linkInput.classList.add('d-none');
+            fileInput.classList.remove('d-none');
+        }
+    });
+});
+
+
+
+// Fungsi format tanggal
+function formatTanggal(tanggalISO) {
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC'
+  };
+  
+  // Untuk browser yang support locale ID
+  try {
+    return new Date(tanggalISO)
+      .toLocaleDateString('id-ID', options)
+      .replace(/(\b\w)/g, m => m.toUpperCase());
+  } 
+  // Fallback untuk browser lama
+  catch {
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bulan = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    
+    const tgl = new Date(tanggalISO);
+    return `${hari[tgl.getUTCDay()]}, ${tgl.getUTCDate()} ${bulan[tgl.getUTCMonth()]} ${tgl.getUTCFullYear()}`;
+  }
+}
+
+// Event listener untuk tombol Tambah Jadwal
+document.querySelector('[data-bs-target="#modalTambahJadwal"]').addEventListener('click', function() {
+    const form = document.querySelector('#modalTambahJadwal form');
+    form.reset();
+    form.dataset.mode = 'add';
+    form.querySelector('input[name="id"]').value = '';
+    form.closest('.modal').querySelector('.modal-title').textContent = 'Tambah Jadwal Baru';
+});
+
+  </script>
+</body>
+</html>
