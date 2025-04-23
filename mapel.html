@@ -106,7 +106,7 @@
       return new Promise(resolve => {
         const cb = 'cb_' + Date.now();
         window[cb] = res => { resolve(res.mapel); delete window[cb]; };
-        const base = 'https://script.google.com/macros/s/AKfycbweUxww34uk0pqPE-Gk_xaebgvxRNRCFicXy7I22gYTlt2xFi1uwrv1iK0FhTDEaw17/exec';
+        const base = 'https://script.google.com/macros/s/AKfycbz6z0gzFhuFoDnNsD9wj-g2WqT_c8XUORhgE91a_oHd2IRcXOSlr2QLqPDG-QxLGycj/exec';
         const params = [
           'action=getMapel',
           'kelas=' + encodeURIComponent(kelas),
