@@ -220,6 +220,48 @@
         to { opacity: 1; transform: scale(1); }
     }
 
+    /* Tambahkan di bagian style */
+    @media (max-width: 767px) {
+        #sidebar {
+            left: -220px;
+            transition: all 0.3s ease;
+            top: 56px; /* Sesuaikan tinggi header */
+            height: calc(100vh - 56px);
+        }
+        
+        #sidebar.active {
+            left: 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+        
+        #content {
+            margin-left: 0;
+        }
+        
+        header {
+            padding: 0.5rem;
+        }
+        
+        /* Overlay untuk mobile */
+        .sidebar-overlay {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 998;
+            display: none;
+        }
+    }
+
+    /* Desktop style tetap */
+    @media (min-width: 768px) {
+        #sidebarToggle {
+            display: none !important;
+        }
+    }
+
     footer {
         position: fixed;
         bottom: 0;
@@ -258,12 +300,18 @@
   
     <div id="admin-wrapper" class="d-none">
         <!-- HEADER -->
-        <header class="d-flex align-items-center justify-content-between">
-            <h4 class="mb-0">Admin Dashboard PKBM</h4>
-            <button class="btn btn-outline-light btn-sm" onclick="logout()">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </button>
-        </header>
+        
+        <header class="d-flex align-items-center justify-content-between px-3">
+          <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-light d-md-none" id="sidebarToggle">
+                  <i class="bi bi-list"></i>
+              </button>
+              <h4 class="mb-0">Admin Dashboard PKBM</h4>
+          </div>
+          <button class="btn btn-outline-light btn-sm" onclick="logout()">
+              <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
+      </header>
 
         <!-- MAIN -->
         <main>
@@ -621,6 +669,41 @@
     // Show/hide loading overlay
     function showLoading() { document.getElementById('loadingOverlay').classList.remove('d-none'); }
     function hideLoading() { document.getElementById('loadingOverlay').classList.add('d-none'); }
+
+
+
+  // Di dalam tag <script>
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.createElement('div');
+      overlay.className = 'sidebar-overlay';
+      
+      if (!sidebar.classList.contains('active')) {
+          sidebar.classList.add('active');
+          document.body.appendChild(overlay);
+          
+          // Tutup sidebar saat klik overlay
+          overlay.addEventListener('click', () => {
+              sidebar.classList.remove('active');
+              overlay.remove();
+          });
+      } else {
+          sidebar.classList.remove('active');
+          overlay.remove();
+      }
+  });
+
+  // Tutup sidebar saat pilih menu di mobile
+  document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+          if (window.innerWidth < 768) {
+              document.getElementById('sidebar').classList.remove('active');
+              document.querySelector('.sidebar-overlay')?.remove();
+          }
+      });
+  });
+
+
 
 
     document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
@@ -1728,6 +1811,7 @@ document.querySelector('[data-bs-target="#modalTambahJadwal"]').addEventListener
     form.querySelector('input[name="id"]').value = '';
     form.closest('.modal').querySelector('.modal-title').textContent = 'Tambah Jadwal Baru';
 });
+
 
   </script>
 </body>
