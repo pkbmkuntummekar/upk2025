@@ -189,6 +189,9 @@
             card.classList.add('active');
             card.onclick = () => {
               const soalToken = Math.random().toString(36).substring(2,15) + Date.now();
+              // Hapus timer lama sebelum mulai ujian baru
+              const timerKey = `timer_${user.nama}_${user.kelas}_${mp}`;
+              localStorage.removeItem(timerKey);
               sessionStorage.setItem('soal_token', soalToken);
               sessionStorage.setItem('mapel', mp);
               window.location.href = `soal.html?token=${soalToken}`;

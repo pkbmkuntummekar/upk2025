@@ -588,7 +588,7 @@
         const totalSec = jadwal.waktuUjian * 60;
         const key = `timer_${user.nama}_${user.kelas}_${mapel}`;
         let end = parseInt(localStorage.getItem(key), 10);
-        if (!end || isNaN(end)) {
+        if (!end || isNaN(end) || end <= Date.now()) {
           end = Date.now() + totalSec * 1000;
           localStorage.setItem(key, end);
         }
