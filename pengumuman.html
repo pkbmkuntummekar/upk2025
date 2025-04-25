@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ranking Siswa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      font-family: 'Poppins', sans-serif; 
+      touch-action: manipulation;
+    }
+    
+    body {
+      background: #000;
+      color: #fff;
+      width: 100%; 
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+    }
+    
+    canvas#particles {
+      position: fixed; 
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%; 
+      z-index: -1;
+    }
+    
+    #wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 20px;
+    }
+    
+    .ranking-container {
+      display: flex;
+      gap: 10px;
+      transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+    
+    .card {
+      width: 200px;
+      height: 120px;
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(255,255,255,0.1);
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.6s ease, transform 0.3s ease;
+    }
+    
+    .card.gold { background: linear-gradient(135deg,#FFD700,#FFC107); color: #000; }
+    .card.silver { background: linear-gradient(135deg,#C0C0C0,#DCDCDC); color: #000; }
+    .card.bronze { background: linear-gradient(135deg,#CD7F32,#C08050); color: #000; }
+    .card.white { background: linear-gradient(135deg,#FFF,#E0E0E0); color: #000; }
+    
+    .rank-number {
+      position: absolute; 
+      left: 50%; 
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px; 
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.6s ease, left 0.5s ease, transform 0.5s ease;
+    }
+    
+    .card-content {
+      position: absolute; 
+      left: 60px; 
+      top: 50%; 
+      transform: translateY(-50%);
+      display: flex; 
+      flex-direction: column;
+      opacity: 0;
+      width: calc(100% - 70px);
+    }
+    
+    .card-content h3 { 
+      font-size: 14px; 
+      text-transform: lowercase; 
+      margin-bottom: 4px; 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .card-content p { 
+      font-size: 12px; 
+      margin: 2px 0; 
+    }
+    
+    .card.slide .rank-number {
+      left: 15px;
+      transform: translate(0, -50%);
+    }
+    
+    .card.slide .card-content {
+      opacity: 1;
+      transition: opacity 0.6s ease 0.5s;
+    }
+    
+    .mini-cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 15px;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      width: 100%;
+      max-width: 600px;
+    }
+    
+    .mini-card {
+      width: 100px; 
+      height: 80px;
+      background: #222;
+      border-radius: 8px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* Mobile Styles */
+    @media (max-width: 768px) {
+      body {
+        overflow-y: auto;
+        height: auto;
+        padding: 10px 0;
+      }
+      
+      #wrapper {
+        padding: 10px;
+      }
+      
+      .ranking-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        transform: none !important;
+      }
+      
+      .card {
+        width: 95%;
+        max-width: 300px;
+        height: 100px;
+        margin: 0 auto;
+      }
+      
+      .rank-number {
+        font-size: 36px;
+      }
+      
+      .card-content {
+        left: 50px;
+      }
+      
+      .mini-cards {
+        padding: 0 5px;
+      }
+      
+      .mini-card {
+        width: calc(33.33% - 5px);
+        height: 70px;
+        font-size: 10px;
+      }
+    }
+
+    /* Desktop Styles */
+    @media (min-width: 769px) {
+      .ranking-container {
+        flex-direction: row;
+      }
+      
+      #wrapper {
+        height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+  <div id="wrapper">
+    <div class="ranking-container" id="ranking">
+      <!-- ranking 1-5 -->
+      <div class="card gold">
+        <div class="rank-number">1</div>
+        <div class="card-content">
+          <h3>Nama Siswa</h3><p>NISN:12345</p><p>Kelas:XII</p><p>Total Nilai:980</p>
+        </div>
+      </div>
+      <div class="card silver">
+        <div class="rank-number">2</div>
+        <div class="card-content">
+          <h3>Nama Siswa</h3><p>NISN:12346</p><p>Kelas:XII</p><p>Total Nilai:970</p>
+        </div>
+      </div>
+      <div class="card bronze">
+        <div class="rank-number">3</div>
+        <div class="card-content">
+          <h3>Nama Siswa</h3><p>NISN:12347</p><p>Kelas:XII</p><p>Total Nilai:960</p>
+        </div>
+      </div>
+      <div class="card white">
+        <div class="rank-number">4</div>
+        <div class="card-content">
+          <h3>Nama Siswa</h3><p>NISN:12348</p><p>Kelas:XII</p><p>Total Nilai:950</p>
+        </div>
+      </div>
+      <div class="card white">
+        <div class="rank-number">5</div>
+        <div class="card-content">
+          <h3>Nama Siswa</h3><p>NISN:12349</p><p>Kelas:XII</p><p>Total Nilai:940</p>
+        </div>
+      </div>
+    </div>
+    <div class="mini-cards" id="miniCards"></div>
+  </div>
+  <script>
+    // 1) Endpoint Apps Script (ganti dengan milikmu)
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweUxww34uk0pqPE-Gk_xaebgvxRNRCFicXy7I22gYTlt2xFi1uwrv1iK0FhTDEaw17/exec';
+  
+    // 2) Helper untuk capitalize setiap kata
+    function capitalizeWords(str) {
+      return (str || '').split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    }
+  
+    // 3) Inisialisasi partikel (tetap pakai yang lama)
+    const canvas = document.getElementById('particles');
+    const ctx    = canvas.getContext('2d');
+  
+    function initParticles() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const parts = Array.from({ length: 80 }, () => ({
+        x:  Math.random() * canvas.width,
+        y:  Math.random() * canvas.height,
+        r:  Math.random() * 2 + 1,
+        vx: Math.random() - 0.5,
+        vy: Math.random() - 0.5
+      }));
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(138,43,226,0.7)';
+        parts.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
+          ctx.fill();
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
+          if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        });
+        requestAnimationFrame(render);
+      }
+      render();
+      return parts;
+    }
+    const particles = initParticles();
+  
+    // 4) Ambil data ranking via JSONP
+    function fetchRanking() {
+      window.handleRanking = function(res) {
+        if (!res.success) {
+          console.error('Error fetching ranking:', res.message);
+          return;
+        }
+        // Urutkan desc by totalNilai
+        const data = res.data.sort((a, b) => b.totalNilai - a.totalNilai);
+  
+        // 4a) Isi 5 card utama
+        const cards        = document.querySelectorAll('.ranking-container .card');
+        const medalClasses = ['gold','silver','bronze','white','white'];
+        cards.forEach((card, i) => {
+          const raw = data[i] || { nama:'-', nisn:'-', totalNilai:0 };
+          const nama = capitalizeWords(raw.nama);
+          card.className = `card ${medalClasses[i]}`;
+          card.querySelector('.rank-number').textContent = i + 1;
+          card.querySelector('.card-content').innerHTML = `
+            <h3>${nama}</h3>
+            <p>NISN: ${raw.nisn}</p>
+            <p>Total Nilai: ${raw.totalNilai}</p>
+          `;
+        });
+  
+        // 4b) Isi mini-cards untuk peringkat 6 ke atas
+        const mini = document.getElementById('miniCards');
+        mini.innerHTML = '';
+        data.slice(5).forEach((raw, idx) => {
+          const nama = capitalizeWords(raw.nama);
+          const d = document.createElement('div');
+          d.className = 'mini-card';
+          d.innerHTML = `
+            #${idx + 6}<br>
+            ${nama}<br>
+            ${raw.totalNilai}
+          `;
+          mini.appendChild(d);
+        });
+  
+        // 5) Baru jalankan animasi setelah DOM ter-update
+        startAnimations();
+      };
+  
+      // Tambah script JSONP
+      const s = document.createElement('script');
+      s.src = `${SCRIPT_URL}?action=getTotalNilai&callback=handleRanking`;
+      document.body.appendChild(s);
+    }
+  
+    // 6) Animasi fade / slide
+    function startAnimations() {
+      setTimeout(() => {
+        document.querySelectorAll('.card').forEach(c => c.style.opacity = '1');
+      }, 500);
+      setTimeout(() => {
+        document.querySelectorAll('.rank-number').forEach(r => r.style.opacity = '1');
+      }, 1000);
+      setTimeout(() => {
+        document.querySelectorAll('.card').forEach(c => c.classList.add('slide'));
+      }, 2000);
+      setTimeout(() => {
+        document.getElementById('ranking').style.transform = 'translateY(-20px)';
+        document.getElementById('miniCards').style.opacity = '1';
+        if (window.innerWidth <= 768) {
+          document.body.style.height    = 'auto';
+          document.body.style.overflowY = 'auto';
+        }
+      }, 4000);
+    }
+  
+    // 7) Responsif resize
+    function handleResize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles.forEach(p => {
+        p.x = Math.random() * canvas.width;
+        p.y = Math.random() * canvas.height;
+      });
+      if (window.innerWidth <= 768) {
+        document.body.style.overflowY = 'auto';
+      } else {
+        document.body.style.overflow  = 'hidden';
+      }
+    }
+  
+    // 8) Listeners & onload
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    document.body.addEventListener('touchmove', e => {
+      if (window.innerWidth <= 768) e.preventDefault();
+    }, { passive: false });
+    window.addEventListener('load', () => {
+      fetchRanking();
+      handleResize();
+    });
+  </script>
+  
+  
+</body>
+</html>
