@@ -188,12 +188,12 @@
           hideLoading();
 
           let pesan = result.message?.toLowerCase() || '';
-          let teks = 'Data Peserta Didik tidak ditemukan. Beri tahu ke Proktor/Pengawas Ujian.';
+          let teks = 'Peserta Didik tidak ditemukan dikelas ini. Beri tahu ke Proktor/Pengawas Ujian.';
 
           if (pesan.includes('nama peserta')) {
             teks = 'Nama Peserta Didik Salah, sesuaikan dengan kartu login.';
           } else if (pesan.includes('nisn tidak terdaftar')) {
-            teks = 'NISN tidak terdaftar, silahkan coba lagi.';
+            teks = 'NISN Salah, sesuaikan dengan kartu login.';
           } else if (pesan.includes('tidak berada di kelas')) {
             const match = result.message.match(/kelas (.*)/i);
             const kelasSalah = match ? match[1] : 'yang benar';

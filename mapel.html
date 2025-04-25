@@ -91,6 +91,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     function showLoading() {
       document.getElementById('loading-overlay').style.display = 'flex';
@@ -98,28 +99,26 @@
     function hideLoading() {
       document.getElementById('loading-overlay').style.display = 'none';
     }
-
+  
     const user = JSON.parse(sessionStorage.getItem('user'));
-      if (!user) window.location.href = 'index.html';
-
-      // Cek token URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlToken = urlParams.get('token');
-      const savedToken = sessionStorage.getItem('mapel_token');
-
-      if (!urlToken || urlToken !== savedToken) {
-        sessionStorage.removeItem('mapel_token');
-        window.location.href = 'index.html';
-      }
-
-      // Hapus token setelah validasi
+    if (!user) window.location.href = 'index.html';
+  
+    // Cek token URL
+    const urlParams   = new URLSearchParams(window.location.search);
+    const urlToken    = urlParams.get('token');
+    const savedToken  = sessionStorage.getItem('mapel_token');
+    if (!urlToken || urlToken !== savedToken) {
       sessionStorage.removeItem('mapel_token');
-
+      window.location.href = 'index.html';
+    }
+    sessionStorage.removeItem('mapel_token');
+  
+    const base = 'https://script.google.com/macros/s/AKfycbz6z0gzFhuFoDnNsD9wj-g2WqT_c8XUORhgE91a_oHd2IRcXOSlr2QLqPDG-QxLGycj/exec';
+  
     function getMapel(kelas) {
       return new Promise(resolve => {
-        const cb = 'cb_' + Date.now();
+        const cb = 'cb_map_' + Date.now();
         window[cb] = res => { resolve(res.mapel); delete window[cb]; };
-        const base = 'https://script.google.com/macros/s/AKfycbz6z0gzFhuFoDnNsD9wj-g2WqT_c8XUORhgE91a_oHd2IRcXOSlr2QLqPDG-QxLGycj/exec';
         const params = [
           'action=getMapel',
           'kelas=' + encodeURIComponent(kelas),
@@ -130,51 +129,94 @@
         document.body.appendChild(s);
       });
     }
-
+  
+    // ✨ Baru: ambil langsung data Nilai dari Apps Script
+    function getNilai(kelas) {
+      return new Promise(resolve => {
+        const cb = 'cb_nil_' + Date.now();
+        window[cb] = res => { resolve(res.nilai || []); delete window[cb]; };
+        const params = [
+          'action=getNilai',
+          'kelas=' + encodeURIComponent(kelas),
+          'callback=' + cb
+        ].join('&');
+        const s = document.createElement('script');
+        s.src = `${base}?${params}`;
+        document.body.appendChild(s);
+      });
+    }
+  
     document.addEventListener('DOMContentLoaded', async () => {
       showLoading();
       try {
-        const mapelList = await getMapel(user.kelas);
-        const container = document.getElementById('mapel-list');
-        mapelList.forEach((item, index) => {
-          const col = document.createElement('div');
-          col.className = 'col-6 col-md-4 col-lg-3';
+        // 1) Ambil daftar Mapel, 2) Ambil daftar Nilai (live)
+        const [mapelList, nilaiList] = await Promise.all([
+          getMapel(user.kelas),
+          getNilai(user.kelas)
+        ]);
 
+        // 1) Pilih hanya baris Nilai yang untuk user ini
+        const myNilai = nilaiList.filter(n =>
+          String(n.nama || '').trim().toLowerCase() === user.nama.trim().toLowerCase() &&
+          String(n.nisn || '').trim() === user.nisn.trim()
+        );
+
+        const completed = new Set(
+          myNilai.map(n => String(n.mapel || '').trim())
+        );
+  
+        const container = document.getElementById('mapel-list');
+        container.innerHTML = '';
+  
+        mapelList.forEach((item, index) => {
+          const col  = document.createElement('div');
+          col.className = 'col-6 col-md-4 col-lg-3';
+  
           const card = document.createElement('div');
           card.className = 'mapel-card';
           card.style.animationDelay = `${index * 0.1}s`;
-
           card.innerHTML = `
             <div class="mapel-icon mb-2"><i class="bi bi-book"></i></div>
             <h6 class="fw-bold">${item.mataPelajaran}</h6>
           `;
-
-          if (item.status.toLowerCase() === 'aktif') {
+  
+          const mp = item.mataPelajaran.trim();
+          const done = completed.has(mp);
+  
+          if (item.status.toLowerCase() === 'aktif' && !done) {
+            // Hanya aktif dan belum tercatat → clickable
             card.style.cursor = 'pointer';
             card.classList.add('active');
             card.onclick = () => {
-              // Generate token baru untuk soal.html
-              const soalToken = Math.random().toString(36).substring(2, 15) + Date.now();
+              const soalToken = Math.random().toString(36).substring(2,15) + Date.now();
               sessionStorage.setItem('soal_token', soalToken);
-              sessionStorage.setItem('mapel', item.mataPelajaran);
-              
-              // Redirect dengan token baru
+              sessionStorage.setItem('mapel', mp);
               window.location.href = `soal.html?token=${soalToken}`;
             };
           } else {
+            // Disable tombol untuk mapel non-aktif atau sudah tercatat
             card.classList.add('opacity-50');
+            card.style.cursor = 'not-allowed';
+            if (done) {
+              const badge = document.createElement('div');
+              badge.className = 'mt-2 text-center text-muted small';
+              badge.textContent = 'Sudah dikerjakan';
+              card.appendChild(badge);
+            }
           }
-
+  
           col.appendChild(card);
           container.appendChild(col);
         });
+  
       } catch (err) {
-        console.error('Gagal mengambil mapel:', err);
-        alert('Terjadi kesalahan saat mengambil data mapel.');
+        console.error('Error memuat data mapel/nilai:', err);
+        alert('Gagal memuat data. Silakan coba lagi.');
       } finally {
         hideLoading();
       }
     });
   </script>
+  
 </body>
 </html>
