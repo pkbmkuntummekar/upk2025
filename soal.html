@@ -752,23 +752,55 @@
 
   
     function showConfirm() {
-      const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
-      modal.show();
-      
-      document.getElementById('btn-notSure').onclick = () => modal.hide();
-      
-      document.getElementById('btn-sure').onclick = async () => {
-        modal.hide();
-        showLoading(); // TAMPILKAN LOADING SETELAH TOMBOL YAKIN DIKLIK
-        try {
-          await submitAll();
-          clearLocalAnswer();
-          showThankYou();
-        } catch (err) {
-          console.error(err);
-        }
-      };
+      const modalEl = document.getElementById('confirmModal');
+      const modal   = new bootstrap.Modal(modalEl);
+      const answered = questions.filter((q, i) =>
+        answers[i] && answers[i].value
+      ).length;
+      const total    = questions.length;
+      const body     = modalEl.querySelector('.modal-body');
+      const footer   = modalEl.querySelector('.modal-footer');
+
+      if (answered === total) {
+        // Semua soal telah dijawab
+        body.textContent = 'Apakah Anda yakin dengan jawaban Anda?';
+        footer.innerHTML = `
+          <button type="button" class="btn btn-secondary" id="btn-notSure">
+            Tidak Yakin
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-sure">
+            Yakin
+          </button>
+        `;
+        modal.show();
+
+        modalEl.querySelector('#btn-notSure').onclick = () => modal.hide();
+        modalEl.querySelector('#btn-sure').onclick     = async () => {
+          modal.hide();
+          showLoading();
+          try {
+            await submitAll();
+            clearLocalAnswer();
+            showThankYou();
+          } catch (err) {
+            console.error(err);
+          }
+        };
+
+      } else {
+        // Masih ada soal kosong
+        body.textContent = 'Masih ada soal yang belum dikerjakan!';
+        footer.innerHTML = `
+          <button type="button" class="btn btn-primary" id="btn-close">
+            Close
+          </button>
+        `;
+        modal.show();
+
+        modalEl.querySelector('#btn-close').onclick = () => modal.hide();
+      }
     }
+
   
     async function submitAll() {
       showLoading(); // TAMPILKAN LOADING
