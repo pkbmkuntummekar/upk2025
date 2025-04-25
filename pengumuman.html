@@ -234,7 +234,6 @@
         </div>
       </div>
     </div>
-    <div class="mini-cards" id="miniCards"></div>
   </div>
   <script>
     // 1) Endpoint Apps Script (ganti dengan milikmu)
@@ -304,20 +303,7 @@
           `;
         });
   
-        // 4b) Isi mini-cards untuk peringkat 6 ke atas
-        const mini = document.getElementById('miniCards');
-        mini.innerHTML = '';
-        data.slice(5).forEach((raw, idx) => {
-          const nama = capitalizeWords(raw.nama);
-          const d = document.createElement('div');
-          d.className = 'mini-card';
-          d.innerHTML = `
-            #${idx + 6}<br>
-            ${nama}<br>
-            ${raw.totalNilai}
-          `;
-          mini.appendChild(d);
-        });
+
   
         // 5) Baru jalankan animasi setelah DOM ter-update
         startAnimations();
@@ -342,7 +328,6 @@
       }, 2000);
       setTimeout(() => {
         document.getElementById('ranking').style.transform = 'translateY(-20px)';
-        document.getElementById('miniCards').style.opacity = '1';
         if (window.innerWidth <= 768) {
           document.body.style.height    = 'auto';
           document.body.style.overflowY = 'auto';
